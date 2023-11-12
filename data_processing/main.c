@@ -4,6 +4,8 @@
 
 const unsigned MAX_LENGTH = 300;
 int FilterPixel_Intensity[300] = {0};
+int Trough_Position[300] = {0};
+int Trough_Intensity[300] = {0};
 
 void ReadFile_and_StoreInputData(int inputPixel_Intensity[], int inputPixel_Position[])
 {
@@ -80,14 +82,49 @@ void Apply_rolling_median_filter(int *inputPixel_Intensity)
     }
 }
 //****************************************************************************************************************
+void Peak_Detection(int *inputPixel_Position, int *Peak_Intensity, int *Peak_Position)
+{
+    int i = 0, prev = 0;
+    char direction = 'u';
+
+    // Start by assuming we're increasing to allow first element peak.
+    prev = FilterPixel_Intensity[0];
+    direction = 'u';
+
+    for (i = 1; i < MAX_LENGTH - 2; i++)
+    {
+        // If switching from rising to falling, it is a peak.
+        if ((FilterPixel_Intensity[i] < prev) && direction == 'u')
+        {
+            *(Peak_Position + i - 1) = *(inputPixel_Position + i - 1);
+            *(Peak_Intensity + i - 1) = prev;
+            direction = 'd';
+        }
+        // If switching from falling to rising, that is a trough. so Prepare to detect next peak.
+        if ((FilterPixel_Intensity[i] > prev) && direction == 'd')
+        {
+            Trough_Position[i - 1] = *(inputPixel_Position + i - 1); // not used, just for reference
+            Trough_Intensity[i - 1] = prev;                          // not used, just for reference
+            direction = 'u';
+        }
+        // Store previous to detect peak / trough.
+        prev = FilterPixel_Intensity[i];
+        // Note: we are not considering last signal as a peak (we should consider ,if it`s rising )and can be implemented for future work
+    }   
+}
+//********************************************************************************************
+
 int main()
 {
     printf("Have fun with the challenge!\n");
     int inputPixel_Position[300] = {0};
     int inputPixel_Intensity[300] = {0};
+    int Peak_Position[300] = {0};
+    int Peak_Intensity[300] = {0};
 
     ReadFile_and_StoreInputData(inputPixel_Intensity, inputPixel_Position);
     Apply_rolling_median_filter(inputPixel_Intensity); // step 1: Background noise removal using a rolling median filter
+    Peak_Detection(inputPixel_Position, Peak_Intensity, Peak_Position);
 
     return 0;
 }
