@@ -198,6 +198,34 @@ void Grating_binary(int *Peak_Position)
     }
 }
 //*****************************************************************************+
+void GNUplot_plotting(int *inputPixel_Intensity, int *inputPixel_Position, int *Peak_Intensity)
+{
+    int i;
+    char *commandsForGnuplot[] = {"set title \"Interherence\"", "plot 'data.temp'  with lines title 'Input Intensity'"};
+    //{"set title \"Interherence\"", "plot 'data.temp'  with lines title 'Input Intensity' using 1:2 index 0 \ 'data.temp' with linespoints title 'Series B' using 1:2 index 1 "}; //\ 'data.temp' with linespoints title 'Series B',   using 1:2 with lines, with linespoints,  using 3:0
+
+    FILE *fp = fopen("data.temp", "w");
+    FILE *gnuplotPipe = popen("gnuplot -persistent", "w");
+    fprintf(gnuplotPipe, "set term qt persist\n");
+    for (i = 0; i < MAX_LENGTH - 2; i++)
+    {
+        fprintf(fp, "%d %d \n", *(inputPixel_Position + i), *(inputPixel_Intensity + i)); // Write the data to a temporary file
+    }
+    fprintf(fp, " \n");
+    for (i = 0; i < MAX_LENGTH - 2; i++)
+    {
+        fprintf(fp, "%d %d \n", *(inputPixel_Position + i), *(Peak_Intensity + i)); // Write the data to a temporary file
+    }
+    for (i = 0; i < 2; i++)
+    {
+        fprintf(gnuplotPipe, "%s \n", commandsForGnuplot[i]); // Send commands to gnuplot one by one.
+    }
+    // fflush(gnuplotPipe);
+    // fclose(fp);
+    return;
+}
+
+//**********************************************************************************+
 int main()
 {
     printf("Have fun with the challenge!\n");
@@ -211,6 +239,7 @@ int main()
     Peak_Detection(inputPixel_Position, Peak_Intensity, Peak_Position);    // step 2 : peak detection
     find_Position_and_half_max_width(inputPixel_Position, Peak_Intensity); // step 3: width
     Grating_binary(Peak_Position);                                         // step 4: binary grating
+    GNUplot_plotting(inputPixel_Intensity, inputPixel_Position, Peak_Intensity); //plotting using gnuplot
 
     printf("Input_Ins   |  Input_Pos  |  Filter_Ins  |  Peak_In    |  Peak_Pos    |  Peak_Width  | Grating_Bin \n");
     int i = 0;
