@@ -64,9 +64,7 @@ void Apply_rolling_median_filter(int *inputPixel_Intensity)
 
         if (A > B) // Sorting A and B
         {
-            Temp = A;
-            A = B;
-            B = Temp; // swap A and B
+            Temp = A;  A = B; B = Temp; // swap A and B
         }
         // compare sorting of 3 signals
         if (C >= A && C <= B)
@@ -221,7 +219,7 @@ void GNUplot_plotting(int *inputPixel_Intensity, int *inputPixel_Position, int *
         fprintf(gnuplotPipe, "%s \n", commandsForGnuplot[i]); // Send commands to gnuplot one by one.
     }
     // fflush(gnuplotPipe);
-    // fclose(fp);
+     fclose(fp);
     return;
 }
 
@@ -243,7 +241,7 @@ int main()
 
     printf("Input_Ins   |  Input_Pos  |  Filter_Ins  |  Peak_In    |  Peak_Pos    |  Peak_Width  | Grating_Bin \n");
     int i = 0;
-    for (i = 0; i < 300; i++)
+    for (i = 0; i < MAX_LENGTH; i++)
     {
         printf("  %5d\t|\t%6d\t|\t%5d\t|\t%4d\t|\t%6d\t|\t%6d\t|\t%d\n", *(inputPixel_Intensity + i), *(inputPixel_Position + i), *(FilterPixel_Intensity + i), *(Peak_Intensity + i), *(Peak_Position + i), *(Peak_Width + i), *(Grating_Binary_Pos + i));
     }
